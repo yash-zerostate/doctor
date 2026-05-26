@@ -8,7 +8,7 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, UserButton } from "@clerk/nextjs";
 import { checkUser } from "@/lib/checkUser";
 import { Badge } from "./ui/badge";
 import { checkAndAllocateCredits } from "@/actions/credits";
@@ -35,9 +35,10 @@ export default async function Header() {
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-2">
-          <SignedIn>
+          {user && (
+            <>
             {/* Admin Links */}
-            {user?.role === "ADMIN" && (
+            {user.role === "ADMIN" && (
               <Link href="/admin">
                 <Button
                   variant="outline"
@@ -53,7 +54,7 @@ export default async function Header() {
             )}
 
             {/* Doctor Links */}
-            {user?.role === "DOCTOR" && (
+            {user.role === "DOCTOR" && (
               <Link href="/doctor">
                 <Button
                   variant="outline"
@@ -69,7 +70,7 @@ export default async function Header() {
             )}
 
             {/* Patient Links */}
-            {user?.role === "PATIENT" && (
+            {user.role === "PATIENT" && (
               <Link href="/appointments">
                 <Button
                   variant="outline"
@@ -85,7 +86,7 @@ export default async function Header() {
             )}
 
             {/* Unassigned Role */}
-            {user?.role === "UNASSIGNED" && (
+            {user.role === "UNASSIGNED" && (
               <Link href="/onboarding">
                 <Button
                   variant="outline"
@@ -99,7 +100,8 @@ export default async function Header() {
                 </Button>
               </Link>
             )}
-          </SignedIn>
+            </>
+          )}
 
           {(!user || user?.role !== "ADMIN") && (
             <Link href={user?.role === "PATIENT" ? "/pricing" : "/doctor"}>
@@ -126,13 +128,13 @@ export default async function Header() {
             </Link>
           )}
 
-          <SignedOut>
+          {!user && (
             <SignInButton>
               <Button variant="secondary">Sign In</Button>
             </SignInButton>
-          </SignedOut>
+          )}
 
-          <SignedIn>
+          {user && (
             <UserButton
               appearance={{
                 elements: {
@@ -143,7 +145,7 @@ export default async function Header() {
               }}
               afterSignOutUrl="/"
             />
-          </SignedIn>
+          )}
         </div>
       </nav>
     </header>
