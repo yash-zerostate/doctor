@@ -38,8 +38,7 @@ export default async function PricingPage() {
         </p>
       </div>
 
-      {/* Pricing Table Section */}
-      <Pricing />
+      {/* <Pricing /> */}
 
       {/* FAQ Section - Optional */}
       <div className="max-w-3xl mx-auto mt-16 text-center">

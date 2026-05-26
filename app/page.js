@@ -118,8 +118,7 @@ export default function Home() {
           </div>
 
           <div className="mx-auto">
-            {/* Clerk Pricing Table */}
-            <Pricing />
+            {/* <Pricing /> */}
 
             {/* Description */}
             <Card className="mt-12 bg-muted/20 border-emerald-900/30">

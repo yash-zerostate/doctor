@@ -8,13 +8,22 @@ import { Vonage } from "@vonage/server-sdk";
 import { addDays, addMinutes, format, isBefore, endOfDay } from "date-fns";
 import { Auth } from "@vonage/auth";
 
-// Initialize Vonage Video API client
-const credentials = new Auth({
-  applicationId: process.env.NEXT_PUBLIC_VONAGE_APPLICATION_ID,
-  privateKey: process.env.VONAGE_PRIVATE_KEY,
-});
-const options = {};
-const vonage = new Vonage(credentials, options);
+// Check if Vonage is configured
+const hasVonageCreds = !!(process.env.NEXT_PUBLIC_VONAGE_APPLICATION_ID && process.env.VONAGE_PRIVATE_KEY);
+
+// Initialize Vonage Video API client safely
+let vonage = null;
+if (hasVonageCreds) {
+  try {
+    const credentials = new Auth({
+      applicationId: process.env.NEXT_PUBLIC_VONAGE_APPLICATION_ID,
+      privateKey: process.env.VONAGE_PRIVATE_KEY,
+    });
+    vonage = new Vonage(credentials, {});
+  } catch (err) {
+    console.error("Failed to initialize Vonage client:", err.message);
+  }
+}
 
 /**
  * Book a new appointment with a doctor
@@ -147,6 +156,10 @@ export async function bookAppointment(formData) {
  * Generate a Vonage Video API session
  */
 async function createVideoSession() {
+  if (!vonage) {
+    console.warn("Vonage credentials are not configured. Returning mock session ID.");
+    return `mock-session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
   try {
     const session = await vonage.video.createSession({ mediaMode: "routed" });
     return session.sessionId;
@@ -229,11 +242,13 @@ export async function generateVideoToken(formData) {
     });
 
     // Generate the token with appropriate role and expiration
-    const token = vonage.video.generateClientToken(appointment.videoSessionId, {
-      role: "publisher", // Both doctor and patient can publish streams
-      expireTime: expirationTime,
-      data: connectionData,
-    });
+    const token = vonage
+      ? vonage.video.generateClientToken(appointment.videoSessionId, {
+          role: "publisher", // Both doctor and patient can publish streams
+          expireTime: expirationTime,
+          data: connectionData,
+        })
+      : `mock-token-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Update the appointment with the token
     await db.appointment.update({
