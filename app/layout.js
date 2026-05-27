@@ -1,4 +1,5 @@
 import "./globals.css";
+import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import Header from "@/components/header";
@@ -20,6 +21,17 @@ export default function RootLayout({ children }) {
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/logo.png" sizes="any" />
+          {/*
+            Preta Loader — injects live elements (clones, modals, banners, badges)
+            from the Preta dashboard onto this site.
+            beforeInteractive ensures anti-flicker CSS lands before first paint.
+          */}
+          <Script
+            src="https://loader.pretasystems.com/?d=https://doctor-peach-delta.vercel.app"
+            strategy="beforeInteractive"
+            data-api="https://app.pretasystems.com/api"
+            data-debug="true"
+          />
         </head>
         <body>
           <ThemeProvider
