@@ -21,24 +21,32 @@ export default function RootLayout({ children }) {
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/logo.png" sizes="any" />
-          {/*
-            Preta Loader — injects live elements (clones, modals, banners, badges)
-            from the Preta dashboard onto this site.
-            beforeInteractive ensures anti-flicker CSS lands before first paint.
-          */}
-          <Script
-            src="https://loader.pretasystems.com/?d=https://doctor-peach-delta.vercel.app"
-            strategy="beforeInteractive"
-            data-api="https://app.pretasystems.com/api"
-            data-debug="true"
-          />
         </head>
+        <Script
+          src="https://loader.pretasystems.com/?d=https://doctor-peach-delta.vercel.app"
+          strategy="afterInteractive"
+          data-api="https://app.pretasystems.com/api"
+          data-debug="true"
+        />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-P0LL1DLQKN"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-P0LL1DLQKN');
+          `}
+        </Script>
         <body>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
+            scriptProps={{ async: true }}
           >
             <Header />
             <main className="min-h-screen">{children}</main>
