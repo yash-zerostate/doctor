@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
   }`
 }} />
         <Script
-          src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=https://doctor-peach-delta.vercel.app"
+          src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
           strategy="afterInteractive"
           data-api="https://app.pretasystems.com/api"
           data-debug="true"
