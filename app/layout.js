@@ -22,8 +22,14 @@ export default function RootLayout({ children }) {
         <head>
           <link rel="icon" href="/logo.png" sizes="any" />
         </head>
+        <script dangerouslySetInnerHTML={{
+  __html: `window.pretaUser = {
+    plan: "enterprise",
+    risk_score: 0.8
+  }`
+}} />
         <Script
-          src="https://audiance-loader-worker.pushkarnagwekar.workers.dev/?d=https://doctor-peach-delta.vercel.app"
+          src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=https://doctor-peach-delta.vercel.app"
           strategy="afterInteractive"
           data-api="https://app.pretasystems.com/api"
           data-debug="true"
