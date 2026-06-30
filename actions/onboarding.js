@@ -1,14 +1,14 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 /**
  * Sets the user's role and related information
  */
 export async function setUserRole(formData) {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
 
   if (!userId) {
     throw new Error("Unauthorized");
@@ -16,7 +16,7 @@ export async function setUserRole(formData) {
 
   // Find user in our database
   const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
+    where: { id: userId },
   });
 
   if (!user) throw new Error("User not found in database");
@@ -32,7 +32,7 @@ export async function setUserRole(formData) {
     if (role === "PATIENT") {
       await db.user.update({
         where: {
-          clerkUserId: userId,
+          id: userId,
         },
         data: {
           role: "PATIENT",
@@ -57,7 +57,7 @@ export async function setUserRole(formData) {
 
       await db.user.update({
         where: {
-          clerkUserId: userId,
+          id: userId,
         },
         data: {
           role: "DOCTOR",
@@ -82,7 +82,7 @@ export async function setUserRole(formData) {
  * Gets the current user's complete profile information
  */
 export async function getCurrentUser() {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
 
   if (!userId) {
     return null;
@@ -91,7 +91,7 @@ export async function getCurrentUser() {
   try {
     const user = await db.user.findUnique({
       where: {
-        clerkUserId: userId,
+        id: userId,
       },
     });
 

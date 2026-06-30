@@ -1,20 +1,20 @@
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/auth";
 
 /**
  * Get all appointments for the authenticated patient
  */
 export async function getPatientAppointments() {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
 
   if (!userId) {
     throw new Error("Unauthorized");
   }
 
   try {
-    const user = await db.user.findUnique({
+    const user = await db.user.findFirst({
       where: {
-        clerkUserId: userId,
+        id: userId,
         role: "PATIENT",
       },
       select: {

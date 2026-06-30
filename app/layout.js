@@ -1,9 +1,7 @@
 import "./globals.css";
 import Script from "next/script";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import Header from "@/components/header";
-import { dark } from "@clerk/themes";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata = {
@@ -13,11 +11,6 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider
-      appearance={{
-        baseTheme: dark,
-      }}
-    >
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/logo.png" sizes="any" />
@@ -74,6 +67,5 @@ export default function RootLayout({ children }) {
           </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
   );
 }

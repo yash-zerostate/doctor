@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { deductCreditsForAppointment } from "@/actions/credits";
 import { Vonage } from "@vonage/server-sdk";
@@ -29,7 +29,7 @@ if (hasVonageCreds) {
  * Book a new appointment with a doctor
  */
 export async function bookAppointment(formData) {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
 
   if (!userId) {
     throw new Error("Unauthorized");
@@ -37,9 +37,9 @@ export async function bookAppointment(formData) {
 
   try {
     // Get the patient user
-    const patient = await db.user.findUnique({
+    const patient = await db.user.findFirst({
       where: {
-        clerkUserId: userId,
+        id: userId,
         role: "PATIENT",
       },
     });
@@ -60,7 +60,7 @@ export async function bookAppointment(formData) {
     }
 
     // Check if the doctor exists and is verified
-    const doctor = await db.user.findUnique({
+    const doctor = await db.user.findFirst({
       where: {
         id: doctorId,
         role: "DOCTOR",
@@ -173,7 +173,7 @@ async function createVideoSession() {
  * This will be called when either doctor or patient is about to join the call
  */
 export async function generateVideoToken(formData) {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
 
   if (!userId) {
     throw new Error("Unauthorized");
@@ -182,7 +182,7 @@ export async function generateVideoToken(formData) {
   try {
     const user = await db.user.findUnique({
       where: {
-        clerkUserId: userId,
+        id: userId,
       },
     });
 
@@ -276,7 +276,7 @@ export async function generateVideoToken(formData) {
  */
 export async function getDoctorById(doctorId) {
   try {
-    const doctor = await db.user.findUnique({
+    const doctor = await db.user.findFirst({
       where: {
         id: doctorId,
         role: "DOCTOR",
@@ -301,7 +301,7 @@ export async function getDoctorById(doctorId) {
 export async function getAvailableTimeSlots(doctorId) {
   try {
     // Validate doctor existence and verification
-    const doctor = await db.user.findUnique({
+    const doctor = await db.user.findFirst({
       where: {
         id: doctorId,
         role: "DOCTOR",

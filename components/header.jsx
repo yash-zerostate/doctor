@@ -8,7 +8,7 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { SignInButton, UserButton } from "@clerk/nextjs";
+import UserMenu from "./user-menu";
 import { checkUser } from "@/lib/checkUser";
 import { Badge } from "./ui/badge";
 import { checkAndAllocateCredits } from "@/actions/credits";
@@ -129,23 +129,12 @@ export default async function Header() {
           )}
 
           {!user && (
-            <SignInButton>
+            <Link href="/sign-in">
               <Button variant="secondary">Sign In</Button>
-            </SignInButton>
+            </Link>
           )}
 
-          {user && (
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: "w-10 h-10",
-                  userButtonPopoverCard: "shadow-xl",
-                  userPreviewMainIdentifier: "font-semibold",
-                },
-              }}
-              afterSignOutUrl="/"
-            />
-          )}
+          {user && <UserMenu name={user.name} email={user.email} />}
         </div>
       </nav>
     </header>

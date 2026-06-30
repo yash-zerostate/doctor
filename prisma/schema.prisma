@@ -6,30 +6,30 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                String    @id @default(uuid())
-  clerkUserId       String    @unique // Clerk's user ID
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
   email             String    @unique
+  passwordHash      String // bcrypt hash for custom auth
   name              String?
   imageUrl          String?
   role              UserRole  @default(UNASSIGNED) // UNASSIGNED, PATIENT, DOCTOR, ADMIN
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
-  
+
   // Patient-specific fields
   credits           Int       @default(2) // Accumulated credit balance
-  
+
   // Doctor-specific fields
   specialty         String?
   experience        Int?      // Years of experience
   credentialUrl     String?   // Document URL
-  description       String?   @db.Text
+  description       String?
   verificationStatus VerificationStatus?  @default(PENDING)
-  
+
   // Relations
   patientAppointments Appointment[] @relation("PatientAppointments")
   doctorAppointments  Appointment[] @relation("DoctorAppointments")
@@ -52,13 +52,13 @@ enum VerificationStatus {
 }
 
 model Availability {
-  id        String   @id @default(uuid())
-  doctorId  String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId  String   @db.ObjectId
   doctor    User     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
   startTime DateTime
   endTime   DateTime
   status    SlotStatus @default(AVAILABLE)
-  
+
   @@index([doctorId, startTime])
 }
 
@@ -69,21 +69,21 @@ enum SlotStatus {
 }
 
 model Appointment {
-  id                String   @id @default(uuid())
-  patientId         String
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId         String   @db.ObjectId
   patient           User     @relation("PatientAppointments", fields: [patientId], references: [id])
-  doctorId          String
+  doctorId          String   @db.ObjectId
   doctor            User     @relation("DoctorAppointments", fields: [doctorId], references: [id])
   startTime         DateTime // Start time of appointment
   endTime           DateTime // End time of appointment
   status            AppointmentStatus @default(SCHEDULED)
-  notes             String?  @db.Text
-  patientDescription String? @db.Text
-    
+  notes             String?
+  patientDescription String?
+
   // Video session fields
   videoSessionId    String?  // Vonage Video API Session ID
   videoSessionToken String?  // Optional: Can store tokens if needed
-  
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -98,8 +98,8 @@ enum AppointmentStatus {
 }
 
 model CreditTransaction {
-  id                String   @id @default(uuid())
-  userId            String
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String   @db.ObjectId
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   amount            Int      // Positive for additions, negative for usage
   type              TransactionType
@@ -108,14 +108,14 @@ model CreditTransaction {
 }
 
 enum TransactionType {
-  CREDIT_PURCHASE     // Credits purchased through Clerk Billing
+  CREDIT_PURCHASE     // Credits purchased
   APPOINTMENT_DEDUCTION // Credit used for appointment
   ADMIN_ADJUSTMENT      // Manual adjustment by admin
 }
 
 model Payout {
-  id              String        @id @default(uuid())
-  doctorId        String
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId        String        @db.ObjectId
   doctor          User          @relation(fields: [doctorId], references: [id], onDelete: Cascade)
   amount          Float         // Total payout amount in USD
   credits         Int           // Number of credits being paid out

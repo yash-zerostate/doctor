@@ -1,31 +1,54 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { SESSION_COOKIE, verifySession } from "@/lib/session";
 
-const isProtectedRoute = createRouteMatcher([
-  "/doctors(.*)",
-  "/onboarding(.*)",
-  "/doctor(.*)",
-  "/admin(.*)",
-  "/video-call(.*)",
-  "/appointments(.*)",
-]);
+// Routes that require an authenticated session.
+const PROTECTED = [
+  "/doctors",
+  "/onboarding",
+  "/doctor",
+  "/admin",
+  "/video-call",
+  "/appointments",
+];
 
-export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+function matches(pathname, prefix) {
+  return pathname === prefix || pathname.startsWith(prefix + "/");
+}
 
-  if (!userId && isProtectedRoute(req)) {
-    const { redirectToSignIn } = await auth();
-    return redirectToSignIn();
+export default async function middleware(req) {
+  const { pathname } = req.nextUrl;
+
+  const isProtected = PROTECTED.some((p) => matches(pathname, p));
+  if (!isProtected) return NextResponse.next();
+
+  const token = req.cookies.get(SESSION_COOKIE)?.value;
+  const session = token ? await verifySession(token) : null;
+
+  // Not logged in -> send to sign-in (preserve intended destination).
+  if (!session) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/sign-in";
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Role gating.
+  if (matches(pathname, "/admin") && session.role !== "ADMIN") {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+  if (
+    (pathname === "/doctor" || pathname.startsWith("/doctor/")) &&
+    session.role !== "DOCTOR"
+  ) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };

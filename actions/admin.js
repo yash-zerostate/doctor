@@ -1,14 +1,14 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 /**
  * Verifies if current user has admin role
  */
 export async function verifyAdmin() {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
 
   if (!userId) {
     return false;
@@ -17,7 +17,7 @@ export async function verifyAdmin() {
   try {
     const user = await db.user.findUnique({
       where: {
-        clerkUserId: userId,
+        id: userId,
       },
     });
 
@@ -193,13 +193,13 @@ export async function approvePayout(formData) {
 
   try {
     // Get admin user info
-    const { userId } = await auth();
+    const userId = await getAuthUserId();
     const admin = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { id: userId },
     });
 
     // Find the payout request
-    const payout = await db.payout.findUnique({
+    const payout = await db.payout.findFirst({
       where: {
         id: payoutId,
         status: "PROCESSING",
