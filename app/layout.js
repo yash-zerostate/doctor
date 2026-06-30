@@ -40,12 +40,15 @@ export default async function RootLayout({ children }) {
             />
           )}
         </head>
-        <Script
-          src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
-          strategy="afterInteractive"
-          data-api="https://app.pretasystems.com/api"
-          data-ctx-var="__PRETA_CTX__"
-          data-debug="true"
+     
+<div data-preta-slot="page-top"></div>
+
+
+        <Script src="https://preta-policy-phase1.pushkarnagwekar.workers.dev/sdk.js"
+        data-tenant-id="d2698929-3689-49bc-9577-327ee4cd36d0"
+        data-domain="doctor-peach-delta.vercel.app"
+        data-evaluate="https://preta-policy-phase1.pushkarnagwekar.workers.dev/evaluate"
+        data-ctx-var="__PRETA_CTX__"
         />
         <Script id="segment-snippet" strategy="afterInteractive">
           {`
