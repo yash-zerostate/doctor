@@ -8,11 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "node --env-file=.env prisma/seed.js",
+    "keys:generate": "node scripts/generate-jwt-keys.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.0.0",
-    "@clerk/themes": "^2.2.43",
     "@hookform/resolvers": "^5.0.1",
     "@prisma/client": "^6.7.0",
     "@radix-ui/react-alert-dialog": "^1.1.13",
