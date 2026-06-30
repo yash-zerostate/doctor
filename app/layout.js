@@ -3,28 +3,48 @@ import Script from "next/script";
 import { Toaster } from "sonner";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getSession } from "@/lib/auth";
+import { createPretaContextToken, pretaContextForUser } from "@/lib/preta-token";
 
 export const metadata = {
   title: "Doctors Appointment App",
   description: "Connect with doctors anytime, anywhere",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Server-side: sign a short-lived Preta context token for the logged-in user
+  // and expose it as window.__PRETA_CTX__ for the Preta loader (data-ctx-var).
+  const session = await getSession();
+  let pretaCtxToken = null;
+  if (session) {
+    try {
+      pretaCtxToken = await createPretaContextToken({
+        ...pretaContextForUser(session),
+        role: session.role,
+        email: session.email,
+      });
+    } catch (e) {
+      console.error("Preta context token error:", e.message);
+    }
+  }
+
   return (
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/logo.png" sizes="any" />
+          {pretaCtxToken && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.__PRETA_CTX__=${JSON.stringify(pretaCtxToken)}`,
+              }}
+            />
+          )}
         </head>
-        <script dangerouslySetInnerHTML={{
-  __html: `window.pretaUser = {
-    plan: "enterprise",
-    risk_score: 0.8
-  }`
-}} />
         <Script
           src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
           strategy="afterInteractive"
           data-api="https://app.pretasystems.com/api"
+          data-ctx-var="__PRETA_CTX__"
           data-debug="true"
         />
         <Script id="segment-snippet" strategy="afterInteractive">
