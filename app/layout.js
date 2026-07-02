@@ -52,21 +52,20 @@ export default async function RootLayout({ children }) {
               }}
             />
           )}
+          {/* Preta SmartCode — raw <script> in <head> so it appears in the
+              server-rendered HTML (Preta's verifier fetches the page and greps
+              for this tag). */}
+          <script
+            async
+            src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
+            data-api="https://preta-dashboard-phase1.pushkarnagwekar.workers.dev/api"
+            data-ctx-endpoint="/api/preta-token"
+          ></script>
         </head>
      
 <div data-preta-slot="page-top"></div>
 
 
-        {/* Preta SmartCode — element loader + user context. ?d=<domain> injects the
-            approved elements/targeting; the loader fetches the signed identity token
-            from data-ctx-endpoint (/api/preta-token) which Preta verifies with the
-            registered public key. (Per the Phase 1 dashboard onboarding.) */}
-        <Script
-          src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
-          strategy="afterInteractive"
-          data-api="http://localhost:3000/api"
-          data-ctx-endpoint="/api/preta-token"
-        />
         <Script id="segment-snippet" strategy="afterInteractive">
           {`
             !function(){var i="analytics",analytics=window[i]=window[i]||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","screen","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware","register"];analytics.factory=function(e){return function(){if(window[i].initialized)return window[i][e].apply(window[i],arguments);var n=Array.prototype.slice.call(arguments);if(["track","screen","alias","group","page","identify"].indexOf(e)>-1){var c=document.querySelector("link[rel='canonical']");n.push({__t:"bpc",c:c&&c.getAttribute("href")||void 0,p:location.pathname,u:location.href,s:location.search,t:document.title,r:document.referrer})}n.unshift(e);analytics.push(n);return analytics}};for(var n=0;n<analytics.methods.length;n++){var key=analytics.methods[n];analytics[key]=analytics.factory(key)}analytics.load=function(key,n){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.setAttribute("data-global-segment-analytics-key",i);t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(t,r);analytics._loadOptions=n};analytics._writeKey="uujaytBec0IKw7feQ5OWz4LtxHlNceya";;analytics.SNIPPET_VERSION="5.2.0";
