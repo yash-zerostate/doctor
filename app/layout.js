@@ -16,13 +16,19 @@ export default async function RootLayout({ children }) {
   // and expose it as window.__PRETA_CTX__ for the Preta loader (data-ctx-var).
   const session = await getSession();
   let pretaCtxToken = null;
+  let pretaUser = null;
   if (session) {
     try {
-      pretaCtxToken = await createPretaContextToken({
+      const ctx = {
         ...pretaContextForUser(session),
         role: session.role,
         email: session.email,
-      });
+      };
+      // Element loader (/?d=) targets on window.pretaUser (client-side). It needs an
+      // `id` so the visitor isn't treated as a guest, plus the derived attributes so
+      // "User Attributes" rules (plan / risk_score / account_type) can match.
+      pretaUser = { id: String(session.id), ...ctx };
+      pretaCtxToken = await createPretaContextToken(ctx);
     } catch (e) {
       console.error("Preta context token error:", e.message);
     }
@@ -32,10 +38,17 @@ export default async function RootLayout({ children }) {
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/logo.png" sizes="any" />
-          {pretaCtxToken && (
+          {(pretaUser || pretaCtxToken) && (
             <script
               dangerouslySetInnerHTML={{
-                __html: `window.__PRETA_CTX__=${JSON.stringify(pretaCtxToken)}`,
+                __html: [
+                  pretaUser
+                    ? `window.pretaUser=${JSON.stringify(pretaUser)};`
+                    : "",
+                  pretaCtxToken
+                    ? `window.__PRETA_CTX__=${JSON.stringify(pretaCtxToken)};`
+                    : "",
+                ].join(""),
               }}
             />
           )}
@@ -44,11 +57,15 @@ export default async function RootLayout({ children }) {
 <div data-preta-slot="page-top"></div>
 
 
-        <Script src="https://preta-policy-phase1.pushkarnagwekar.workers.dev/sdk.js"
-        data-tenant-id="d2698929-3689-49bc-9577-327ee4cd36d0"
-        data-domain="doctor-peach-delta.vercel.app"
-        data-evaluate="https://preta-policy-phase1.pushkarnagwekar.workers.dev/evaluate"
-        data-ctx-var="__PRETA_CTX__"
+        {/* Preta SmartCode — element loader + user context. ?d=<domain> injects the
+            approved elements/targeting; the loader fetches the signed identity token
+            from data-ctx-endpoint (/api/preta-token) which Preta verifies with the
+            registered public key. (Per the Phase 1 dashboard onboarding.) */}
+        <Script
+          src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
+          strategy="afterInteractive"
+          data-api="http://localhost:3000/api"
+          data-ctx-endpoint="/api/preta-token"
         />
         <Script id="segment-snippet" strategy="afterInteractive">
           {`
