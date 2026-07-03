@@ -13,6 +13,8 @@ const USERS = [
     name: "Alex Admin",
     role: "ADMIN",
     credits: 0,
+    plan: "enterprise",
+    addOns: ["priority_support", "advanced_analytics", "ai_assistant"],
   },
   {
     email: "patient@medimeet.com",
@@ -20,6 +22,8 @@ const USERS = [
     name: "Pat Patient",
     role: "PATIENT",
     credits: 10,
+    plan: "free",
+    addOns: [],
   },
   {
     email: "dr.smith@medimeet.com",
@@ -27,6 +31,8 @@ const USERS = [
     name: "Dr. Sarah Smith",
     role: "DOCTOR",
     credits: 8,
+    plan: "pro",
+    addOns: ["video_visits", "priority_support"],
     imageUrl:
       "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&q=80",
     specialty: "Cardiology",
@@ -42,6 +48,8 @@ const USERS = [
     name: "Dr. Michael Chen",
     role: "DOCTOR",
     credits: 4,
+    plan: "starter",
+    addOns: ["video_visits"],
     imageUrl:
       "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=800&q=80",
     specialty: "Dermatology",
@@ -56,6 +64,8 @@ const USERS = [
     name: "Dr. Emily Johnson",
     role: "DOCTOR",
     credits: 0,
+    plan: "business",
+    addOns: ["ai_assistant", "advanced_analytics"],
     imageUrl:
       "https://images.unsplash.com/photo-1594824436998-ef22abf2f65a?w=800&q=80",
     specialty: "Pediatrics",

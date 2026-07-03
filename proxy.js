@@ -9,6 +9,7 @@ const PROTECTED = [
   "/admin",
   "/video-call",
   "/appointments",
+  "/billing",
 ];
 
 function matches(pathname, prefix) {

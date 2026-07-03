@@ -4,6 +4,7 @@ import {
   Calendar,
   CreditCard,
   ShieldCheck,
+  Sparkles,
   Stethoscope,
   User,
 } from "lucide-react";
@@ -37,6 +38,20 @@ export default async function Header() {
         <div className="flex items-center space-x-2">
           {user && (
             <>
+            {/* Plan & Add-ons (feeds the Preta policy context) */}
+            <Link href="/billing">
+              <Button
+                variant="ghost"
+                className="hidden md:inline-flex items-center gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                Plan
+              </Button>
+              <Button variant="ghost" className="md:hidden w-10 h-10 p-0">
+                <Sparkles className="h-4 w-4" />
+              </Button>
+            </Link>
+
             {/* Admin Links */}
             {user.role === "ADMIN" && (
               <Link href="/admin">

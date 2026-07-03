@@ -3,7 +3,7 @@ import Script from "next/script";
 import { Toaster } from "sonner";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { getSession } from "@/lib/auth";
+import { getCurrentDbUser } from "@/lib/auth";
 import { createPretaContextToken, pretaContextForUser } from "@/lib/preta-token";
 
 export const metadata = {
@@ -14,20 +14,22 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   // Server-side: sign a short-lived Preta context token for the logged-in user
   // and expose it as window.__PRETA_CTX__ for the Preta loader (data-ctx-var).
-  const session = await getSession();
+  // Read the full DB user (not just the session JWT) so live plan / add-on
+  // changes from the Billing page flow into the Preta context immediately.
+  const user = await getCurrentDbUser();
   let pretaCtxToken = null;
   let pretaUser = null;
-  if (session) {
+  if (user) {
     try {
       const ctx = {
-        ...pretaContextForUser(session),
-        role: session.role,
-        email: session.email,
+        ...pretaContextForUser(user),
+        role: user.role,
+        email: user.email,
       };
       // Element loader (/?d=) targets on window.pretaUser (client-side). It needs an
-      // `id` so the visitor isn't treated as a guest, plus the derived attributes so
-      // "User Attributes" rules (plan / risk_score / account_type) can match.
-      pretaUser = { id: String(session.id), ...ctx };
+      // `id` so the visitor isn't treated as a guest, plus the attributes so
+      // "User Attributes" rules (plan / add_ons / risk_score / …) can match.
+      pretaUser = { id: String(user.id), ...ctx };
       pretaCtxToken = await createPretaContextToken(ctx);
     } catch (e) {
       console.error("Preta context token error:", e.message);

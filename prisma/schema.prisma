@@ -20,6 +20,12 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  // Billing / entitlements — fed into the Preta policy context (preta:user).
+  // `plan` is a tier id (see lib/preta-plans.js); `addOns` is a list of enabled
+  // add-on ids. Optional so pre-existing Mongo docs (missing the field) still read.
+  plan              String?   @default("free")
+  addOns            String[]  // enabled add-on ids, e.g. ["priority_support"]
+
   // Patient-specific fields
   credits           Int       @default(2) // Accumulated credit balance
 

@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth";
+import { getCurrentDbUser } from "@/lib/auth";
 import { createPretaContextToken, pretaContextForUser } from "@/lib/preta-token";
 
 // Always run per-request (reads the session cookie) and on Node (uses jose/getSession).
@@ -11,18 +11,18 @@ export const runtime = "nodejs";
 // it with the PUBLIC key you registered. Token claims live under "preta:user"
 // (issuer = tenant id, audience = "preta.io", RS256, 5-min expiry).
 export async function GET() {
-  const session = await getSession();
+  const user = await getCurrentDbUser();
 
   // No logged-in user → no token; visitor is treated as an anonymous guest.
-  if (!session) {
+  if (!user) {
     return Response.json({ error: "Not authenticated." }, { status: 401 });
   }
 
   try {
     const ctx = {
-      ...pretaContextForUser(session),
-      role: session.role,
-      email: session.email,
+      ...pretaContextForUser(user),
+      role: user.role,
+      email: user.email,
     };
     const token = await createPretaContextToken(ctx);
     return Response.json({ token });
