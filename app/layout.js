@@ -40,7 +40,7 @@ export default async function RootLayout({ children }) {
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/logo.png" sizes="any" />
-          <script dangerouslySetInnerHTML={{ __html:  }} />
+          <script dangerouslySetInnerHTML={{ __html: `(function(){document.documentElement.style.opacity='0';var t=setTimeout(function(){document.documentElement.style.opacity='';},2000);window.__preta_af_clear=function(){clearTimeout(t);document.documentElement.style.transition='opacity 0.15s';document.documentElement.style.opacity='1';setTimeout(function(){document.documentElement.style.transition='';document.documentElement.style.opacity='';},200);};})();` }} />
           {(pretaUser || pretaCtxToken) && (
             <script
               dangerouslySetInnerHTML={{
