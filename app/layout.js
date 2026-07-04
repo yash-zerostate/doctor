@@ -40,7 +40,6 @@ export default async function RootLayout({ children }) {
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/logo.png" sizes="any" />
-          <script dangerouslySetInnerHTML={{ __html: `(function(){document.documentElement.style.opacity='0';var t=setTimeout(function(){document.documentElement.style.opacity='';},2000);window.__preta_af_clear=function(){clearTimeout(t);document.documentElement.style.transition='opacity 0.15s';document.documentElement.style.opacity='1';setTimeout(function(){document.documentElement.style.transition='';document.documentElement.style.opacity='';},200);};})();` }} />
           {(pretaUser || pretaCtxToken) && (
             <script
               dangerouslySetInnerHTML={{
@@ -58,9 +57,7 @@ export default async function RootLayout({ children }) {
           {/* Preta SmartCode — raw <script> in <head> so it appears in the
               server-rendered HTML (Preta's verifier fetches the page and greps
               for this tag). */}
-          <script
-           async
-            src="https://yash-loader-worker.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
+          <script            src="https://yash-loader-worker.pushkarnagwekar.workers.dev/boot?d=doctor-peach-delta.vercel.app"
             data-api="https://preta-dashboard-phase1.pushkarnagwekar.workers.dev/api"
             data-ctx-endpoint="/api/preta-token"
           ></script>
