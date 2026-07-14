@@ -57,7 +57,7 @@ export default async function RootLayout({ children }) {
           {/* Preta SmartCode — raw <script> in <head> so it appears in the
               server-rendered HTML (Preta's verifier fetches the page and greps
               for this tag). */}
-          <script            src="https://yash-loader-worker.pushkarnagwekar.workers.dev/boot?d=doctor-peach-delta.vercel.app"
+          <script            src="hamza-phase-1.pushkarnagwekar.workers.dev/boot?d=doctor-peach-delta.vercel.app"
             data-api="https://preta-dashboard-phase1.pushkarnagwekar.workers.dev/api"
             data-ctx-endpoint="/api/preta-token"
           ></script>
