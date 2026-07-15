@@ -58,6 +58,7 @@ export default async function RootLayout({ children }) {
               server-rendered HTML (Preta's verifier fetches the page and greps
               for this tag). */}
           <script src="https://hamza-phase-1.pushkarnagwekar.workers.dev/boot?d=doctor-peach-delta.vercel.app"
+            defer
             data-api="https://preta-dashboardphasev1-1.pushkarnagwekar.workers.dev/api"
             data-ctx-var="__PRETA_CTX__"
             data-ctx-endpoint="/api/preta-token"
