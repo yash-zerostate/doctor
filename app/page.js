@@ -56,6 +56,8 @@ export default function Home() {
                 alt="Doctor consultation"
                 fill
                 priority
+                fetchPriority="high"
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover md:pt-14 rounded-xl"
               />
             </div>
