@@ -39,6 +39,18 @@ export default async function RootLayout({ children }) {
   return (
       <html lang="en" suppressHydrationWarning>
         <head>
+          {/* Preta anti-flicker (single-stage) — hides the page instantly so the
+              site's own content never paints before Preta injects, then the loader's
+              revealPage() calls __preta_af_clear to show everything together (no
+              pop-in). Replaces the /boot handshake: because this runs inline in
+              <head>, we can point the SmartCode straight at /?d= and save one
+              network round-trip (~250ms). 2s fallback reveals if the loader fails. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html:
+                "(function(){document.documentElement.style.opacity='0';var t=setTimeout(function(){document.documentElement.style.opacity='';},2000);window.__preta_af_clear=function(){clearTimeout(t);document.documentElement.style.transition='opacity .15s';document.documentElement.style.opacity='1';setTimeout(function(){document.documentElement.style.transition='';document.documentElement.style.opacity='';},200);};})();",
+            }}
+          />
           <link rel="icon" href="/logo.png" sizes="any" />
           {(pretaUser || pretaCtxToken) && (
             <script
@@ -57,7 +69,7 @@ export default async function RootLayout({ children }) {
           {/* Preta SmartCode — raw <script> in <head> so it appears in the
               server-rendered HTML (Preta's verifier fetches the page and greps
               for this tag). */}
-          <script src="https://hamza-phase-1.pushkarnagwekar.workers.dev/boot?d=doctor-peach-delta.vercel.app"
+          <script src="https://hamza-phase-1.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
             defer
             data-api="https://app.pretasystems.com/v2/api"
             data-ctx-var="__PRETA_CTX__"
