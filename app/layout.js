@@ -89,6 +89,13 @@ export default async function RootLayout({ children }) {
           `}
         </Script>
         <Script
+          id="preta-loader"
+          src="https://loader.pretasystems.com/?d=doctor-peach-delta.vercel.app"
+          strategy="afterInteractive"
+          data-api="https://app.pretasystems.com/api"
+          data-debug="true"
+        />
+        <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-P0LL1DLQKN"
           strategy="afterInteractive"
         />
