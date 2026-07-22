@@ -69,12 +69,7 @@ export default async function RootLayout({ children }) {
           {/* Preta SmartCode — raw <script> in <head> so it appears in the
               server-rendered HTML (Preta's verifier fetches the page and greps
               for this tag). */}
-          <script src="https://hamza-phase-1.pushkarnagwekar.workers.dev/?d=doctor-peach-delta.vercel.app"
-            defer
-            data-api="https://app.pretasystems.com/v2/api"
-            data-ctx-var="__PRETA_CTX__"
-            data-ctx-endpoint="/api/preta-token"
-          ></script>
+         
         </head>
      
 <div data-preta-slot="page-top"></div>
