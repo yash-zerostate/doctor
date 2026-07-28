@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getCurrentDbUser } from "@/lib/auth";
-import { createPretaContextToken, pretaContextForUser } from "@/lib/preta-token";
+import { createPretaContextToken, pretaContextForUser, hashUserId } from "@/lib/preta-token";
 
 export const metadata = {
   title: "Doctors Appointment App",
@@ -20,10 +20,14 @@ export default async function RootLayout({ children }) {
   let pretaCtxToken = null;
   if (user) {
     try {
+      // No raw PII in the token. `email` used to be sent here and was never targeted on —
+      // it only put a real address into a third party's logs. `uid` replaces it: a salted
+      // one-way hash that lets Preta count the same person across devices without being
+      // able to identify them (see hashUserId).
       const ctx = {
         ...pretaContextForUser(user),
         role: user.role,
-        email: user.email,
+        uid: await hashUserId(user.id),
       };
       pretaCtxToken = await createPretaContextToken(ctx);
     } catch (e) {

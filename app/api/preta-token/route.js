@@ -1,5 +1,5 @@
 import { getCurrentDbUser } from "@/lib/auth";
-import { createPretaContextToken, pretaContextForUser } from "@/lib/preta-token";
+import { createPretaContextToken, pretaContextForUser, hashUserId } from "@/lib/preta-token";
 
 // Always run per-request (reads the session cookie) and on Node (uses jose/getSession).
 // Without force-dynamic the route can be cached/prerendered as a build-time 401.
@@ -19,10 +19,13 @@ export async function GET() {
   }
 
   try {
+    // Must stay identical to the ctx built in app/layout.js — the same visitor can be
+    // served by either path, and a claim present in one but not the other would make
+    // targeting flip depending on which one happened to supply the token.
     const ctx = {
       ...pretaContextForUser(user),
       role: user.role,
-      email: user.email,
+      uid: await hashUserId(user.id),
     };
     const token = await createPretaContextToken(ctx);
     return Response.json({ token });

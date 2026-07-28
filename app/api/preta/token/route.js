@@ -10,10 +10,10 @@ export async function GET() {
   }
 
   try {
+    // Only what the token still carries — email/name are deliberately not passed
+    // (see createPretaToken: no raw PII in a signed, copyable token).
     const token = await createPretaToken({
       id: session.id,
-      email: session.email,
-      name: session.name,
       role: session.role,
     });
     return Response.json({ token });
