@@ -15,9 +15,11 @@ export default function UserMenu({ name, email }) {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       // Clear any Preta profile so downstream analytics revert to guest.
+      // The signed context token is NOT cleared here — the loader caches it in
+      // sessionStorage keyed by the auth token (core/edge.js), so losing the session
+      // invalidates that entry on its own, and the token expires in 5 minutes regardless.
       try {
         localStorage.removeItem("preta_sim_user");
-        delete window.pretaUser;
       } catch {}
       router.push("/");
       router.refresh();

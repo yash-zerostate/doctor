@@ -18,7 +18,6 @@ export default async function RootLayout({ children }) {
   // changes from the Billing page flow into the Preta context immediately.
   const user = await getCurrentDbUser();
   let pretaCtxToken = null;
-  let pretaUser = null;
   if (user) {
     try {
       const ctx = {
@@ -26,10 +25,6 @@ export default async function RootLayout({ children }) {
         role: user.role,
         email: user.email,
       };
-      // Element loader (/?d=) targets on window.pretaUser (client-side). It needs an
-      // `id` so the visitor isn't treated as a guest, plus the attributes so
-      // "User Attributes" rules (plan / add_ons / risk_score / …) can match.
-      pretaUser = { id: String(user.id), ...ctx };
       pretaCtxToken = await createPretaContextToken(ctx);
     } catch (e) {
       console.error("Preta context token error:", e.message);
@@ -39,37 +34,80 @@ export default async function RootLayout({ children }) {
   return (
       <html lang="en" suppressHydrationWarning>
         <head>
-          {/* Preta anti-flicker (single-stage) — hides the page instantly so the
-              site's own content never paints before Preta injects, then the loader's
-              revealPage() calls __preta_af_clear to show everything together (no
-              pop-in). Replaces the /boot handshake: because this runs inline in
-              <head>, we can point the SmartCode straight at /?d= and save one
-              network round-trip (~250ms). 2s fallback reveals if the loader fails. */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html:
-                "(function(){document.documentElement.style.opacity='0';var t=setTimeout(function(){document.documentElement.style.opacity='';},2000);window.__preta_af_clear=function(){clearTimeout(t);document.documentElement.style.transition='opacity .15s';document.documentElement.style.opacity='1';setTimeout(function(){document.documentElement.style.transition='';document.documentElement.style.opacity='';},200);};})();",
-            }}
-          />
+          {/* Anti-flicker lives entirely in the /boot script below — there is no inline
+              snippet here any more. /boot is render-blocking in <head>, so the parser has
+              not reached <body> when it runs: nothing has been painted yet, and hiding the
+              page there is just as early as hiding it inline. Two copies only duplicated
+              the work, and the inline one also left the page blank for its full 2s fallback
+              whenever pretasystems.com was blocked or slow — with /boot alone, a blocked
+              loader simply means the page renders untouched.
+
+              Note this is NOT covered by the loader's own installGlobalAntiFlicker(): that
+              bails on `document.readyState !== 'loading'`, and the loader is a ~119 KB
+              gzipped async bundle that virtually always executes after parsing has finished.
+              /boot is what actually guards the paint. */}
           <link rel="icon" href="/logo.png" sizes="any" />
-          {(pretaUser || pretaCtxToken) && (
+          {/* The signed context token, read by the loader via data-ctx-var below.
+              Embedding it here rather than letting the loader fetch /api/preta-token is
+              worth roughly 0.35s warm and ~1.8s on a cold serverless start, and that fetch
+              sits on the critical path — getRawContextJWT() is awaited BEFORE /evaluate is
+              posted, so the two are serialised. It matters because /boot has the page hidden
+              behind a 2s fallback: the fetch path can spend that entire budget and reveal the
+              page before anything has been injected.
+
+              This element MUST stay above the SmartCode. edgeDecisionCanStartNow() checks
+              whether this variable is already assigned; if the script tag were parsed first
+              the variable would still be empty and the early /evaluate kick-off would be
+              skipped for every visitor.
+
+              Only the token is exposed. A window.pretaUser object used to be emitted next to
+              it for the client-side targeting path, but data-ctx-* puts the loader in edge
+              mode, where checkTargeting() is bypassed and the loader never reads it
+              (orchestrator/loader.js) — so it did nothing except publish the user's email,
+              plan and role into the page source. */}
+          {pretaCtxToken && (
             <script
               dangerouslySetInnerHTML={{
-                __html: [
-                  pretaUser
-                    ? `window.pretaUser=${JSON.stringify(pretaUser)};`
-                    : "",
-                  pretaCtxToken
-                    ? `window.__PRETA_CTX__=${JSON.stringify(pretaCtxToken)};`
-                    : "",
-                ].join(""),
+                __html: `window.__PRETA_CTX__=${JSON.stringify(pretaCtxToken)};`,
               }}
             />
           )}
           {/* Preta SmartCode — raw <script> in <head> so it appears in the
               server-rendered HTML (Preta's verifier fetches the page and greps
-              for this tag). */}
-         
+              for this tag).
+
+              Points at the v1 loader (loader-v1 + /v1/api), which is what the
+              creator-onboarding flow issues. It REPLACES the old main-loader tag rather
+              than sitting beside it: the loader sets a global window.__PRETA_INITIALIZED__
+              and any second copy logs "already initialized" and does nothing, so two
+              loaders on one page means one of them is silently dead.
+
+              Kept as the verbatim /boot form the dashboard hands out, so this file matches
+              what support/docs will tell anyone to paste. /boot is a ~400B script that hides
+              the page (window.__preta_af_clear + a 2s fallback reveal) and then appends the
+              real loader (/?d=) with async, forwarding data-api / data-ctx-endpoint /
+              data-ctx-token-key / data-ctx-var / data-debug onto it. It is the ONLY
+              anti-flicker in this page — see the note above <link rel="icon">.
+
+              No `async` here, matching the issued snippet — and load-bearing, not cosmetic:
+              async would let the parser run ahead and paint body content before /boot hides
+              it, which is the flicker this exists to prevent. /boot also reads its own
+              attributes via document.currentScript, and running at parse time gets the real
+              loader downloading as early as possible.
+
+              Auth context is supplied twice on purpose — data-ctx-var is read synchronously
+              from the token this layout already embedded (no fetch, no serverless cold
+              start), and data-ctx-endpoint stays as the fallback for any render where the
+              variable is missing. The loader prefers the var and falls back on its own. */}
+          {/* Preta SmartCode Start */}
+          <script
+            src="https://loader-v1.pretasystems.com/boot?d=doctor-peach-delta.vercel.app"
+            data-api="https://app.pretasystems.com/v1/api"
+            data-ctx-var="__PRETA_CTX__"
+            data-ctx-endpoint="/api/preta-token"
+            data-debug="true"
+          />
+          {/* Preta SmartCode End */}
         </head>
      
 <div data-preta-slot="page-top"></div>
@@ -83,13 +121,9 @@ export default async function RootLayout({ children }) {
             }}();
           `}
         </Script>
-        <Script
-          id="preta-loader"
-          src="https://loader.pretasystems.com/?d=doctor-peach-delta.vercel.app"
-          strategy="afterInteractive"
-          data-api="https://app.pretasystems.com/api"
-          data-debug="true"
-        />
+        {/* The Preta loader moved into <head> above (see the SmartCode comment there):
+            it must be in the server-rendered HTML for install verification, and only one
+            loader can run per page. */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-P0LL1DLQKN"
           strategy="afterInteractive"
