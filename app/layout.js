@@ -105,7 +105,7 @@ export default async function RootLayout({ children }) {
               variable is missing. The loader prefers the var and falls back on its own. */}
           {/* Preta SmartCode Start */}
           <script
-            src="https://loader-v1.pretasystems.com/boot?d=doctor-peach-delta.vercel.app"
+            src="https://loader-v2.pretasystems.com/boot?d=doctor-peach-delta.vercel.app"
             data-api="https://app.pretasystems.com/v2/api"
             data-ctx-var="__PRETA_CTX__"
             data-ctx-endpoint="/api/preta-token"
