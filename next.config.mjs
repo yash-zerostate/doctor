@@ -25,7 +25,8 @@ const nextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "script-src 'self'",
+            value: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: ; connect-src 'self' https://loader.pretasystems.com https://app.pretasystems.com https: wss: ; style-src 'self' 'unsafe-inline' https: ; img-src 'self' data: https: ; font-src 'self' https: data:",
+
           },
         ],
       },
