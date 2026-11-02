@@ -41,10 +41,10 @@ export default async function RootLayout({ children }) {
         
           <link rel="icon" href="/logo.png" sizes="any" />
           {/* In pages/_document.tsx <Head> */}
-          <link rel="preconnect" href="https://loader-v1.pretasystems.com" />
-          <script src="https://loader-v1.pretasystems.com/config?d=doctor-peach-delta.vercel.app"></script>
+          <link rel="preconnect" href="https://loader-v2.pretasystems.com" />
+          <script src="https://loader-v2.pretasystems.com/config?d=doctor-peach-delta.vercel.app"></script>
           <script
-            src="https://loader-v1.pretasystems.com/l/pretaloader.js?d=doctor-peach-delta.vercel.app"
+            src="https://loader-v2.pretasystems.com/l/pretaloader.js?d=doctor-peach-delta.vercel.app"
             data-api="https://app.pretasystems.com/v2/api"
           />
         </head>
