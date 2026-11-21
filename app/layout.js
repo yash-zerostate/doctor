@@ -40,12 +40,23 @@ export default async function RootLayout({ children }) {
         <head>
         
           <link rel="icon" href="/logo.png" sizes="any" />
-          {/* In pages/_document.tsx <Head> */}
+          {/* The signed Preta context token for the logged-in user, read by the loader through
+              data-ctx-var below. It must come BEFORE the Preta scripts, or the loader reads an
+              empty page. Logged out: no token is printed and the visitor is anonymous. */}
+          {pretaCtxToken && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.__PRETA_CTX__=${JSON.stringify(pretaCtxToken)};`,
+              }}
+            />
+          )}
+          {/* Preta SmartCode: plain script tags (not next/script), no async or defer, in this order. */}
           <link rel="preconnect" href="https://loader-v2.pretasystems.com" />
           <script src="https://loader-v2.pretasystems.com/config?d=doctor-peach-delta.vercel.app"></script>
           <script
             src="https://loader-v2.pretasystems.com/l/pretaloader.js?d=doctor-peach-delta.vercel.app"
             data-api="https://app.pretasystems.com/v2/api"
+            data-ctx-var="__PRETA_CTX__"
           />
         </head>
      
