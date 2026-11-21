@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 export default function SignUpPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,8 +30,8 @@ export default function SignUpPage() {
         return;
       }
       // New accounts are UNASSIGNED -> pick a role in onboarding.
-      router.push("/onboarding");
-      router.refresh();
+      // Full page load so the layout prints the Preta token for the new session.
+      window.location.assign("/onboarding");
     } catch {
       setError("Network error. Please try again.");
     } finally {

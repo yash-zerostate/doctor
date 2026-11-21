@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 
 export default function UserMenu({ name, email }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const initial = (name || email || "?").trim().charAt(0).toUpperCase();
 
@@ -21,8 +19,8 @@ export default function UserMenu({ name, email }) {
       try {
         localStorage.removeItem("preta_sim_user");
       } catch {}
-      router.push("/");
-      router.refresh();
+      // Full page load so the old Preta token (window.__PRETA_CTX__) is gone with the session.
+      window.location.assign("/");
     } finally {
       setLoading(false);
     }

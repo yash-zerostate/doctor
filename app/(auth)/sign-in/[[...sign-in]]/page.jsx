@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,6 @@ const ROLE_HOME = {
 };
 
 export default function SignInPage() {
-  const router = useRouter();
   const params = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,8 +45,9 @@ export default function SignInPage() {
         return;
       }
       const redirect = params.get("redirect") || ROLE_HOME[data.user.role] || "/";
-      router.push(redirect);
-      router.refresh();
+      // A full page load, not router.push: the Preta token (window.__PRETA_CTX__) is printed
+      // by the server layout, and an inline script that arrives by client navigation never runs.
+      window.location.assign(redirect);
     } catch {
       setError("Network error. Please try again.");
     } finally {
